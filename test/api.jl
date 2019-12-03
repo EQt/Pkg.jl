@@ -83,10 +83,11 @@ end
     end
 end
 
-@testset "Pkg.precompile_script" begin
-    include("FakeTerminals.jl")
-    import .FakeTerminals.FakeTerminal
 
+include("FakeTerminals.jl")
+import .FakeTerminals.FakeTerminal
+
+@testset "Pkg.precompile_script" begin
     function fake_repl(@nospecialize(f); options::REPL.Options=REPL.Options(confirm_exit=false))
         # Use pipes so we can easily do blocking reads
         # In the future if we want we can add a test that the right object
@@ -120,12 +121,16 @@ end
             sleep(0.1)
             # Consume any extra output
             if bytesavailable(stdout_read) > 0
-                copyback = readavailable(output_copy)
+                copyback = readavailable(stdout_read)
                 #@info(copyback)
             end
 
             # Write the line
             write(stdin_write, line, "\n")
+
+            # Read until some kind of prompt
+            readuntil(stdout_read, "\n")
+            readuntil(stdout_read, ">")
             #@info(line)
         end
 
