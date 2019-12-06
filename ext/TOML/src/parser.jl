@@ -342,6 +342,14 @@ function boolean(p::Parser, st::Int)
     return nothing
 end
 
+"Parse NaN, +Inf, -Inf"
+function nonnum(p::Parser, st::Int)
+    for _ = 1:3
+        println(peek(p))
+    end
+end
+
+
 "Parse number or datetime"
 function numdatetime(p::Parser, st::Int)
     isfloat = false
@@ -370,6 +378,9 @@ function numdatetime(p::Parser, st::Int)
 
     pend = nextpos(p)
     nch = peek(p)
+    if nch == 'n' || nch == 'i'
+        return nonnum(p, st)
+    end
     ret = if decimal === nothing &&
              exponent === nothing &&
              nch != '+' &&
@@ -713,7 +724,7 @@ function value(p::Parser)
         return array(p, pos)
     elseif ch == '{'
         return inlinetable(p, pos)
-    elseif ch == '-' || ch == '+' || isdigit(ch)
+    elseif ch == '-' || ch == '+' || ch == 'n' || ch == 'i' || isdigit(ch)
         return numdatetime(p, pos)
     else
         error(p, pos, pos+1, "expected a value")

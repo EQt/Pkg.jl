@@ -333,6 +333,17 @@ trimmed in raw strings.
         @testval("2_0.0_0e0_0", 20.0)
         @testval("2_0.1_0e1_0", 20.1e10)
 
+        @testset "NaN" begin
+            @test isnan(TOML.parse(Parser("foo = nan"))["foo"])
+            @test isnan(TOML.parse(Parser("foo = +nan"))["foo"])
+            @test isnan(TOML.parse(Parser("foo = -nan"))["foo"])
+        end
+        @testset "Inf" begin
+            @testval("inf", Inf)
+            @testval("+inf", Inf)
+            @testval("-inf", -Inf)
+        end
+
         @fail("4")
 
         @testval("1_0", 10)
